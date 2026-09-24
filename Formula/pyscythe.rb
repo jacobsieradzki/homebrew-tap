@@ -2,7 +2,6 @@
 class Pyscythe < Formula
   desc "Dead code, import cycles, duplication, and complexity for Python codebases"
   homepage "https://github.com/jacobsieradzki/pyscythe"
-  version "0.3.0"
   license "MIT"
 
   on_macos do
