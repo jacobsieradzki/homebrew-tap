@@ -1,6 +1,8 @@
 # A formula that pours a binary can only be wrong in ways a real install
 # shows: a checksum that moved, an archive laid out differently, a binary
 # built for the wrong platform. So install it on every platform it claims.
+# Homebrew refuses a formula given by path, so the checkout is put where a
+# tap lives and installed by name, which is what a user does anyway.
 name: tests
 on:
   push:
@@ -20,12 +22,22 @@ jobs:
           if [ -x /home/linuxbrew/.linuxbrew/bin/brew ]; then
             echo "/home/linuxbrew/.linuxbrew/bin" >>"$GITHUB_PATH"
           fi
-      - run: brew install --formula ./Formula/pyscythe.rb
-      - run: brew test ./Formula/pyscythe.rb
+      - name: This checkout is the tap
+        run: |
+          taps="$(brew --repository)/Library/Taps/jacobsieradzki"
+          mkdir -p "$taps"
+          cp -R "$GITHUB_WORKSPACE" "$taps/homebrew-tap"
+      - run: brew install jacobsieradzki/tap/pyscythe
+      - run: brew test jacobsieradzki/tap/pyscythe
       - run: pyscythe --version
 
   audit:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-      - run: brew audit --strict --online ./Formula/pyscythe.rb
+      - name: This checkout is the tap
+        run: |
+          taps="$(brew --repository)/Library/Taps/jacobsieradzki"
+          mkdir -p "$taps"
+          cp -R "$GITHUB_WORKSPACE" "$taps/homebrew-tap"
+      - run: brew audit --strict --online jacobsieradzki/tap/pyscythe
